@@ -45,7 +45,7 @@ bool validate_iso8859_1char( uint16_t ch )
     //
     // GGG - Need to verify this
     bool checking = true;
-    if ( ch > 0x00ff || ch < 0x0007 || ch > 0x007f && ch < 0x00a0 )
+    if ( ch > 0x00ff || ch < 0x0007 || ( ch > 0x007f && ch < 0x00a0 ) )
       checking = false;
     return checking;
 }
@@ -59,12 +59,12 @@ styp_flags identify_encoding( string ch_seq, styp_flags dflt_flg )
     bool flg_ascii7 = true;
     bool flg_utf8_orig = true;
     bool flg_utf8_compat = true;
-    bool flg_8859 = false;
+    // Not used now     bool flg_8859 = false;
     bool flg_8859_inval_found = false;
     uint16_t utf_chs[ 4 ] { 0, 0, 0, 0 };
     int utf_idx = 0;
     int utf_ch_expect = 0;
-    bool need_utf_validation = false;
+    // Not used now     bool need_utf_validation = false;
     int iter_num = 0;
     bool tmpdbg = false;
 #ifdef OLDdevel  // INdevel
@@ -577,19 +577,19 @@ void str_utf8::fit_to_max_cols( fit_opts style, bool dbg_out )
     index_vec& ivec = get_index_vec();
     target = "";
     string first_part = "";
-    int nsymb1st = 0;
-    int nchar1st = 0;
+    uint16_t nsymb1st = 0;
+    uint16_t nchar1st = 0;
     string second_part = "";
     string h_ellips = "…";
-    int nsymb2nd = 0;
-    int nchar2nd = 0;
-    int nsymb = 0;
-    int nchar = 0;
+    // Not used now     int nsymb2nd = 0;
+    // Not used now     int nchar2nd = 0;
+    uint16_t nsymb = 0;
+    uint16_t nchar = 0;
     if ( ivec.size() > 0 ) ivec.clear();
     // GGG - Is this push_back() a problem?
     ivec.push_back( 0 );
-    int utflft = 0;
-    int stage = maxp;
+    uint16_t utflft = 0;
+    uint16_t stage = maxp;
     uint16_t cod_pt_16;
     bool nsym_adv = false;
     if ( style.end_trim )
@@ -613,7 +613,7 @@ void str_utf8::fit_to_max_cols( fit_opts style, bool dbg_out )
             stage = maxp / 2;
         }
     }
-    int mynsiz = my_name.size();
+    // Not used now     int mynsiz = my_name.size();
     for ( char ach : my_name )
     {
         bool process_chr;
@@ -644,7 +644,7 @@ void str_utf8::fit_to_max_cols( fit_opts style, bool dbg_out )
                 }
                 else
                 {
-                    cod_pt_16 = cod_pt_16 + ( mask & ch ) << ( utflft * 6 );
+                    cod_pt_16 = cod_pt_16 + ( ( mask & ch ) << ( utflft * 6 ) );
                 }
             }
             else
@@ -652,7 +652,7 @@ void str_utf8::fit_to_max_cols( fit_opts style, bool dbg_out )
                 if ( ( ch & 0x0080 ) != 0 )
                 {
                     // start a UTF-8 character symbol
-                    int num_high_bits_set = 1;
+                    uint16_t num_high_bits_set = 1;
                     uint16_t mask = 0x0040;
                     while ( ( ch & mask ) != 0 )
                     {
@@ -697,8 +697,8 @@ void str_utf8::fit_to_max_cols( fit_opts style, bool dbg_out )
             target.append( h_ellips );
             nsymb = nsymb1st + 1;
             nchar = nchar1st + h_ellips.size();
-            ivec[ nsymb ] = nchar;
-            if ( ivec.size() > nsymb + 1 ) ivec.resize( nsymb + 1 );
+            ivec.at( nsymb ) = nchar;
+            if ( ivec.size() > nsymb + 1u ) ivec.resize( nsymb + 1 );
         }
         else if ( nsymb == maxp )
         {
@@ -722,13 +722,13 @@ void str_utf8::fit_to_max_cols( fit_opts style, bool dbg_out )
         uint16_t symbase = nsymb1st + 1;
         ivec[ symbase ] = nchbase;
         uint16_t chr_rmov = chr_need - nchbase;
-        uint16_t sym_rmov = nsymb - sym_need - symbase;
+        // Not used now     uint16_t sym_rmov = nsymb - sym_need - symbase;
         for ( uint16_t idx = 1; idx <= sym_need; idx ++ )
           ivec[ symbase + idx ] = ivec[ nsymb - sym_need + idx ] - chr_rmov;
         target.append( second_part );
         nsymb = symbase + sym_need;
         nchar = nchbase + second_part.size();
-        if ( ivec.size() > nsymb + 1 ) ivec.resize( nsymb + 1 );
+        if ( ivec.size() > nsymb + 1u ) ivec.resize( nsymb + 1 );
     }
     if ( nsymb < maxp )
     {
@@ -960,6 +960,11 @@ void shoflgs( string intro, styp_flags flgs )
       ", UTF_16 = " << flgs.UTF_16 <<
       ", srchstr_first_ch_idx = " << flgs.srchstr_first_ch_idx << endl;
 }
+
+//
+// Comment these out for now as they are not currently being used
+//     #define BUILD_COLOR_CONVERSIONS
+#ifdef BUILD_COLOR_CONVERSIONS
 
 //
 // Color conversion found on https://www.cs.rit.edu/~ncs/color/t_convert.html
@@ -1245,3 +1250,4 @@ rgb hsv2rgb(hsv in)
     return out;
 }
 
+#endif  //  #ifdef BUILD_COLOR_CONVERSIONS

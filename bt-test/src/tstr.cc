@@ -9,6 +9,10 @@
 using namespace std;
 
 str_utf8 plbck_strg;
+string nde_id_str = " new ";
+ostringstream bsvistrm;
+ostream& dbgs = cout;
+ostream& errs = cout;
 
 int main(int argc, char* argv[])
 {
@@ -21,7 +25,7 @@ int main(int argc, char* argv[])
     cout << "The string tst_strn2 is [" << tst_strn2 <<
       "] and capacity of tst_strn2 is " <<
       tst_strn2.capacity() << endl;
-    for ( int idx = 0; idx < 26; idx++ )
+    for ( uint16_t idx = 0; idx < 1; idx++ )
     {
         tst_strng.push_back( static_cast<char>( 'A' + idx ) );
         tst_strng.push_back( static_cast<char>( 'a' + idx ) );
