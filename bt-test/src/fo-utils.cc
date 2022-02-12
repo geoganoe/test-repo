@@ -373,12 +373,15 @@ fit_opts operator|( const fit_opts lft, const fit_opts rt )
     return rslt;
 }
 
-vector<index_vec> ivs = { { 2, 3 }, { 0, 0, 0, 0 }, {}, {} };
+vector<index_vec> ivs __attribute__ ((init_priority (500))) =
+  { { 2, 3 }, { 0, 0, 0, 0 }, {}, {} };
+// GGG - Define this here for now.  May change it later
+str_utf8 plbck_strg __attribute__ ((init_priority (1000)));
 
 str_utf8::str_utf8()
 {
     // cout << "Starting default str_utf8 constructor ";
-    is_nm_str = 0;
+    is_nm_str = 1;  // Identifies this as a default constructed item
     // cout << "and calling setup_index_vec()." << endl;
     setup_index_vec();
 
@@ -437,7 +440,7 @@ str_utf8::~str_utf8()
 {
     if( is_setup )
     {
-        ivs[ vec_idx ].clear();
+        ivs.at( vec_idx ).clear();
         ivs[ 0 ].push_back( vec_idx );
     }
 }
@@ -448,16 +451,17 @@ void str_utf8::setup_index_vec()
 {
     if ( ivs.size() < 2 )
     {
-        vec_idx = 0x1ff;
-        is_setup = 0;
-        return;
+        errs << "The global ivs vector that this depends on is not yet defined"
+          ", so this global define" << endl <<
+          "must be placed in a position after that happens "
+          " -- Exiting program with error." << endl;
+        exit ( 1 );
     }
     if ( ivs[ 0 ].size() < 1 )
     {
         // There are no available index_vec items, so we need to make one
         uint16_t nxt_avl = ivs.size();
-        index_vec new_vec; new_vec.reserve( rescap );
-        ivs.push_back( new_vec );
+        index_vec& new_vec = ivs.emplace_back(); new_vec.reserve( rescap );
         while ( ivs[ 1 ].size() < ivs.size() ) ivs[ 1 ].push_back( 0 );
         vec_idx = nxt_avl;
     }
@@ -466,7 +470,7 @@ void str_utf8::setup_index_vec()
         vec_idx = ivs[ 0 ].back();
         ivs[ 0 ].pop_back();
     }
-    if ( ivs[ vec_idx ].size() > 0 || ivs[ vec_idx ].capacity() < rescap )
+    if ( ivs.at( vec_idx ).size() > 0 || ivs[ vec_idx ].capacity() < rescap )
     {
         // The vector is not properly initialized, so set it up
         if ( ivs[ vec_idx ].capacity() < rescap )
@@ -789,12 +793,25 @@ void str_utf8::append( const str_utf8& utst, uint16_t sym_pos, uint16_t sym_nm )
             myexit ();
         }
     }
+    cout << "In append, the plbck_strg is " <<
+      ( is_setup ? "setup" : "not setup" ) <<
+      " and the default constr flag is " <<
+      ( is_nm_str ? "set" : "not set" ) << " with numchr = " << numchr <<
+      ", numsym = " << numsym << ", maxpos = " << maxpos <<
+      ", and vec_idx = " << vec_idx << endl;
     if ( utst.vec_idx < 2 || utst.vec_idx > ivs.size() - 1 )
     {
         bsvistrm << "Invalid str_utf8 reference parameter passed to "
             "str_utf8::append(), exiting." << endl;
         myexit ();
     }
+    cout << "In append, the utst is " <<
+      ( utst.is_setup ? "setup" : "not setup" ) <<
+      " and the default constr flag is " <<
+      ( utst.is_nm_str ? "set" : "not set" ) <<
+      " with numchr = " << utst.numchr <<
+      ", numsym = " << utst.numsym << ", maxpos = " << utst.maxpos <<
+      ", and vec_idx = " << utst.vec_idx << endl;
     const index_vec& uivec = ivs [ utst.vec_idx ];
     index_vec& ivec = get_index_vec();
     if ( sym_pos > uivec.size() - 1 )

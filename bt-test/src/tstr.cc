@@ -8,11 +8,12 @@
 
 using namespace std;
 
-str_utf8 plbck_strg;
 string nde_id_str = " new ";
 ostringstream bsvistrm;
 ostream& dbgs = cout;
 ostream& errs = cout;
+extern str_utf8 plbck_strg;
+
 
 int main(int argc, char* argv[])
 {
@@ -25,7 +26,15 @@ int main(int argc, char* argv[])
     cout << "The string tst_strn2 is [" << tst_strn2 <<
       "] and capacity of tst_strn2 is " <<
       tst_strn2.capacity() << endl;
-    for ( uint16_t idx = 0; idx < 1; idx++ )
+    cout << "The plbck_strg is " <<
+      ( plbck_strg.is_setup ? "setup" : "not setup" ) <<
+      " and the default constr flag is " <<
+      ( plbck_strg.is_nm_str ? "set" : "not set" ) <<
+      " with numchr = " << plbck_strg.numchr << ", numsym = " <<
+      plbck_strg.numsym << ", maxpos = " << plbck_strg.maxpos <<
+      ", and vec_idx = " << plbck_strg.vec_idx << endl;
+    plbck_strg.init_str( nde_id_str );
+    for ( uint16_t idx = 0; idx < 3; idx++ )
     {
         tst_strng.push_back( static_cast<char>( 'A' + idx ) );
         tst_strng.push_back( static_cast<char>( 'a' + idx ) );
@@ -44,11 +53,16 @@ int main(int argc, char* argv[])
         if ( col_num > 1 ) col_num += disp_nm.numsym + nde_id_str.size() + 3;
         if ( col_num > inf_wid )
         {
+            cout << plbck_strg.target << endl;
             plbck_strg.clear();
         }
-        string tmpid = nde_id_str;
+        string tmpid = to_string( idx );
+        tmpid.insert( 0, 4 - tmpid.size(), ' ' );
         tmpid += " [";
         plbck_strg.append( tmpid );
+        plbck_strg.append( disp_nm );
+        plbck_strg.append( "]" );
+        cout << "plbck_strg target is \"" << plbck_strg.target << "\"." << endl;
     }
     return 0;
 }
